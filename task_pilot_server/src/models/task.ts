@@ -1,4 +1,3 @@
-// src/models/task.ts
 import { Model, Column, Table, DataType, Default, CreatedAt, UpdatedAt } from 'sequelize-typescript';
 
 @Table({
