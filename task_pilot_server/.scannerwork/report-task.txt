@@ -1,0 +1,6 @@
+projectKey=TaskPilot
+serverUrl=http://localhost:9000
+serverVersion=10.5.1.90531
+dashboardUrl=http://localhost:9000/dashboard?id=TaskPilot
+ceTaskId=25d8f055-c88f-43af-b390-4bef0ae460e8
+ceTaskUrl=http://localhost:9000/api/ce/task?id=25d8f055-c88f-43af-b390-4bef0ae460e8

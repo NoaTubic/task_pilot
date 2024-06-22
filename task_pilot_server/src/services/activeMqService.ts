@@ -1,5 +1,4 @@
-import { Client, IFrame, IMessage } from '@stomp/stompjs';
-import * as SockJS from 'sockjs-client';
+import { Client, IFrame } from '@stomp/stompjs';
 
 class ActiveMQService {
   private client: Client;
@@ -11,10 +10,7 @@ class ActiveMQService {
         login: 'admin',
         passcode: 'admin',
       },
-      debug: (str) => {
-        // if (str.includes('PING') || str.includes('PONG')) return;
-        // console.info(str);
-      },
+      debug: (str) => { },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
