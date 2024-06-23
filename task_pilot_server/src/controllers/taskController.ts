@@ -1,44 +1,70 @@
 import { Request, Response } from 'express';
-import { TaskService } from '../services/taskService';
+import asyncHandler from '../utils/asyncHandler';
+import { serialize, deserialize } from '../utils/serialization';
+import { logger } from '../config/logger';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware';
+import TaskService from '../services/taskService';
 
 const taskService = new TaskService();
 
-export const getAllTasks = async (req: Request, res: Response) => {
-  try {
-    const tasks = await taskService.getAllTasks();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred while fetching tasks.', error });
-  }
-};
+class TaskController {
+  // Fetch all tasks for a specific user
+  getAllUserTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const tasks = await TaskService.getAllUserTasks(req.user.id);
+    logger.info(`Successfully fetched all tasks for user with ID: ${req.user.id}`);
+    res.json(tasks.map((task: any) => JSON.parse(serialize(task))));
+  });
 
-export const createTask = async (req: Request, res: Response) => {
-  try {
-    const { title, description } = req.body;
-    const task = await taskService.createTask({ title, description });
-    res.status(201).json({ task });
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred while creating the task.', error });
-  }
-};
+  // Fetch all tasks (Admin)
+  getAllTasks = asyncHandler(async (req: Request, res: Response) => {
+    const tasks = await TaskService.getAllTasks();
+    logger.info('Successfully fetched all tasks');
+    res.json(tasks.map((task: any) => JSON.parse(serialize(task))));
+  });
 
-export const updateTask = async (req: Request, res: Response) => {
-  try {
+  // Add a new task
+  addTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    logger.info(`Request Body: ${JSON.stringify(req.body)}`);
+    try {
+      const deserializedTask = deserialize('task', req.body);
+      const task = await TaskService.createTask(deserializedTask.title, deserializedTask.description, req.user.id);
+      logger.info(`Successfully added task with ID: ${task.id}`);
+      res.status(201).json(JSON.parse(serialize(task)));
+    } catch (error) {
+      logger.error(`Deserialization failed: ${error}`);
+      res.status(400).json({ message: 'Invalid data' });
+    }
+  });
+
+  // Update an existing task
+  updateTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const taskData = req.body;
-    const task = await taskService.updateTask(Number(id), taskData);
-    res.status(200).json({ message: 'Task updated successfully', task });
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred while updating the task.', error });
-  }
-};
+    logger.info(`Request Body: ${JSON.stringify(req.body)}`);
+    try {
+      const deserializedTask = deserialize('task', req.body);
+      const updatedTask = await TaskService.updateTask(id, deserializedTask.title, deserializedTask.description, deserializedTask.isCompleted);
+      logger.info(`Successfully updated task with ID: ${id}`);
+      res.json(JSON.parse(serialize(updatedTask)));
+    } catch (error) {
+      logger.error(`Deserialization failed: ${error}`);
+      res.status(400).json({ message: 'Invalid data' });
+    }
+  });
 
-export const deleteTask = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    await taskService.deleteTask(Number(id));
-    res.status(200).json({ message: 'Task deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred while deleting the task.', error });
-  }
-};
+  // Delete a task
+  deleteTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    await TaskService.deleteTask(req.params.id);
+    logger.info(`Successfully deleted task with ID: ${req.params.id}`);
+    res.status(200).json({ message: `Successfully deleted task with ID: ${req.params.id}` });
+  });
+
+  // Reorder tasks
+  reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { taskIdsInOrder } = req.body;
+    await TaskService.reorderTasks(req.user.id, taskIdsInOrder);
+    logger.info(`Successfully reordered tasks for user with ID: ${req.user.id}`);
+    res.status(200).send('Successfully reordered tasks');
+  });
+}
+
+export default new TaskController();

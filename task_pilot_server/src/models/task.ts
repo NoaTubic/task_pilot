@@ -1,46 +1,79 @@
-import { Model, Column, Table, DataType, Default, CreatedAt, UpdatedAt } from 'sequelize-typescript';
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
+import User from './user';
 
-@Table({
-  tableName: 'tasks',
-  timestamps: true,
-})
-export class Task extends Model {
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  title!: string;
-
-  @Column({
-    type: DataType.TEXT,
-    allowNull: true,
-  })
+interface TaskAttributes {
+  id: string;
+  title: string;
   description?: string;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  order!: number;
-
-  @Default(false)
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-  })
-  isCompleted!: boolean;
-
-  @CreatedAt
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-  })
-  createdAt!: Date;
-
-  @UpdatedAt
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-  })
-  updatedAt!: Date;
+  order: number;
+  isCompleted: boolean;
+  userId: string;
 }
+
+interface TaskCreationAttributes extends Optional<TaskAttributes, 'id' | 'description' | 'isCompleted'> { }
+
+class Task extends Model<TaskAttributes, TaskCreationAttributes> implements TaskAttributes {
+  public id!: string;
+  public title!: string;
+  public description?: string;
+  public order!: number;
+  public isCompleted!: boolean;
+  public userId!: string;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+
+  public static associate() {
+    Task.belongsTo(User, {
+      foreignKey: 'userId',
+      as: 'user',
+    });
+  }
+
+
+}
+
+
+
+
+Task.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    order: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    isCompleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id',
+      },
+    },
+  },
+  {
+    sequelize,
+    tableName: 'Tasks',
+  }
+);
+
+export default Task;
