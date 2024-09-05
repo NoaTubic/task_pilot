@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1"
+  targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler"
+  exporterVersion="10307cb" modeler:executionPlatform="Camunda Cloud"
+  modeler:executionPlatformVersion="8.6.0"
+  camunda:diagramRelationId="1785a5af-b649-4435-acf0-f40d0ef2d41a">
+  <bpmn:process id="template-api-orchestration-1ikt3hz-0ybh8py" name="Get All Tasks"
+    isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:userTaskForm id="UserTaskForm_1l578no">Form for user tasks</zeebe:userTaskForm>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent" name="Start">
+      <bpmn:extensionElements />
+      <bpmn:outgoing>Flow_0me11en</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent" name="End">
+      <bpmn:incoming>Flow_0a1m7yi</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_1lyc3vf" name="Get Tasks">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="get-tasks" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0me11en</bpmn:incoming>
+      <bpmn:outgoing>Flow_17vlgta</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_03lp1bh" name="Create Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1583zq4</bpmn:incoming>
+      <bpmn:outgoing>Flow_0f291mc</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0t3gas1" name="Update Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ohiqtm</bpmn:incoming>
+      <bpmn:outgoing>Flow_1eoeu18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0ctieb5" name="Delete Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="delete-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16no46f</bpmn:incoming>
+      <bpmn:outgoing>Flow_0a1m7yi</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0hbshno" name="Select Task">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="taskId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1vi2x81</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wblz18</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0wblz18" sourceRef="Activity_0hbshno" targetRef="Activity_0d1jdpl" />
+    <bpmn:exclusiveGateway id="Gateway_1s5s87s" name="Update or Delete Selected Task">
+      <bpmn:incoming>Flow_0ifpe6m</bpmn:incoming>
+      <bpmn:outgoing>Flow_16no46f</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0uu9m3l</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_16no46f" name="Delete Task" sourceRef="Gateway_1s5s87s"
+      targetRef="Activity_0ctieb5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=editOptions = "delete"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_17vlgta" sourceRef="Activity_1lyc3vf" targetRef="Activity_0gb60g5" />
+    <bpmn:sequenceFlow id="Flow_0uu9m3l" name="Update Task" sourceRef="Gateway_1s5s87s"
+      targetRef="Activity_0uo3cz1">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=editOptions = "edit" </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0a1m7yi" sourceRef="Activity_0ctieb5" targetRef="EndEvent" />
+    <bpmn:sequenceFlow id="Flow_0me11en" sourceRef="StartEvent" targetRef="Activity_1lyc3vf" />
+    <bpmn:userTask id="Activity_0gb60g5" name="Add New Task or Select an Exisiting One">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="selectOperation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_17vlgta</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rv5dj9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1rv5dj9" sourceRef="Activity_0gb60g5" targetRef="Gateway_09tgo0a" />
+    <bpmn:exclusiveGateway id="Gateway_09tgo0a"
+      name="Create a New Task or Edit/Delete and Existing One">
+      <bpmn:extensionElements>
+        <zeebe:properties>
+          <zeebe:property name="nasd" />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1rv5dj9</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vi2x81</bpmn:outgoing>
+      <bpmn:outgoing>Flow_12vetgq</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1vi2x81" name="Select Task&#10;" sourceRef="Gateway_09tgo0a"
+      targetRef="Activity_0hbshno">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=operation = "edit"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_12vetgq" name="Create New Task&#10;" sourceRef="Gateway_09tgo0a"
+      targetRef="Activity_1xz4unh">
+      <bpmn:extensionElements>
+        <zeebe:properties />
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=operation = "create"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_0d1jdpl" name="Edit or Delete">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="choose-task-0eurj4i" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0wblz18</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ifpe6m</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0ifpe6m" sourceRef="Activity_0d1jdpl" targetRef="Gateway_1s5s87s" />
+    <bpmn:endEvent id="Event_1iw1a0u" name="End">
+      <bpmn:incoming>Flow_1eoeu18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_01u0o5r" name="End">
+      <bpmn:incoming>Flow_0f291mc</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0f291mc" sourceRef="Activity_03lp1bh" targetRef="Event_01u0o5r" />
+    <bpmn:sequenceFlow id="Flow_1eoeu18" sourceRef="Activity_0t3gas1" targetRef="Event_1iw1a0u" />
+    <bpmn:userTask id="Activity_1xz4unh" name="Enter Task Title and Description">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_0breuww" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_12vetgq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1583zq4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1583zq4" sourceRef="Activity_1xz4unh" targetRef="Activity_03lp1bh" />
+    <bpmn:userTask id="Activity_0uo3cz1" name="Update Task Details">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_janc90o" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0uu9m3l</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ohiqtm</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0ohiqtm" sourceRef="Activity_0uo3cz1" targetRef="Activity_0t3gas1" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="template-api-orchestration-1ikt3hz-0ybh8py">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="152" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="265" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1lyc3vf_di" bpmnElement="Activity_1lyc3vf">
+        <dc:Bounds x="210" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0ey6ql5" bpmnElement="Activity_0t3gas1">
+        <dc:Bounds x="1160" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_13deq76" bpmnElement="Activity_0ctieb5">
+        <dc:Bounds x="960" y="320" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gb60g5_di" bpmnElement="Activity_0gb60g5">
+        <dc:Bounds x="330" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_09tgo0a_di" bpmnElement="Gateway_09tgo0a" isMarkerVisible="true">
+        <dc:Bounds x="445" y="215" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="513" y="230" width="76" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_163vzn6" bpmnElement="Event_1iw1a0u">
+        <dc:Bounds x="1322" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1330" y="265" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xz4unh_di" bpmnElement="Activity_1xz4unh">
+        <dc:Bounds x="610" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_055h8ul" bpmnElement="Activity_0uo3cz1">
+        <dc:Bounds x="960" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0hbshno_di" bpmnElement="Activity_0hbshno">
+        <dc:Bounds x="530" y="320" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0pdcgie" bpmnElement="Activity_0d1jdpl">
+        <dc:Bounds x="690" y="320" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1s5s87s_di" bpmnElement="Gateway_1s5s87s" isMarkerVisible="true">
+        <dc:Bounds x="835" y="335" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="818" y="395" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1jmq3se_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1192" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1200" y="385" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1wmwem1" bpmnElement="Event_01u0o5r">
+        <dc:Bounds x="992" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1000" y="145" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_03lp1bh_di" bpmnElement="Activity_03lp1bh">
+        <dc:Bounds x="800" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0wblz18_di" bpmnElement="Flow_0wblz18">
+        <di:waypoint x="630" y="360" />
+        <di:waypoint x="690" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16no46f_di" bpmnElement="Flow_16no46f">
+        <di:waypoint x="885" y="360" />
+        <di:waypoint x="960" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="894" y="342" width="59" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17vlgta_di" bpmnElement="Flow_17vlgta">
+        <di:waypoint x="310" y="240" />
+        <di:waypoint x="330" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uu9m3l_di" bpmnElement="Flow_0uu9m3l">
+        <di:waypoint x="860" y="335" />
+        <di:waypoint x="860" y="240" />
+        <di:waypoint x="960" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="844" y="285" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0a1m7yi_di" bpmnElement="Flow_0a1m7yi">
+        <di:waypoint x="1060" y="360" />
+        <di:waypoint x="1192" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0me11en_di" bpmnElement="Flow_0me11en">
+        <di:waypoint x="188" y="240" />
+        <di:waypoint x="210" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rv5dj9_di" bpmnElement="Flow_1rv5dj9">
+        <di:waypoint x="430" y="240" />
+        <di:waypoint x="445" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vi2x81_di" bpmnElement="Flow_1vi2x81">
+        <di:waypoint x="470" y="265" />
+        <di:waypoint x="470" y="360" />
+        <di:waypoint x="530" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="459" y="310" width="58" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12vetgq_di" bpmnElement="Flow_12vetgq">
+        <di:waypoint x="470" y="215" />
+        <di:waypoint x="470" y="120" />
+        <di:waypoint x="610" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="443" y="52" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ifpe6m_di" bpmnElement="Flow_0ifpe6m">
+        <di:waypoint x="790" y="360" />
+        <di:waypoint x="835" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f291mc_di" bpmnElement="Flow_0f291mc">
+        <di:waypoint x="900" y="120" />
+        <di:waypoint x="992" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1eoeu18_di" bpmnElement="Flow_1eoeu18">
+        <di:waypoint x="1260" y="240" />
+        <di:waypoint x="1322" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1583zq4_di" bpmnElement="Flow_1583zq4">
+        <di:waypoint x="710" y="120" />
+        <di:waypoint x="800" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ohiqtm_di" bpmnElement="Flow_0ohiqtm">
+        <di:waypoint x="1060" y="240" />
+        <di:waypoint x="1160" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

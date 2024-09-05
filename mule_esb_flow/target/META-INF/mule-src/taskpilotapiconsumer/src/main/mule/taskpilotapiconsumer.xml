@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="9077f533-4957-4bc5-8e35-03304c236876" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e142041f-ae5c-45cf-81ec-1ee0a79a3b4e">
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="2acbd3ac-7069-4d39-9a04-97979ae6b12c" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="0030bbef-4fef-48e6-92d1-995360764e9b" >
+		<file:connection workingDir="/Users/noa/AnypointStudio/studio-workspace/taskpilotapiconsumer" />
+	</file:config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="05c5589b-562c-4824-a599-d26fd51c4ecc" basePath="/tasks/" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration3" doc:name="HTTP Request configuration" doc:id="dbeb7cbc-b840-4ee7-ac06-6da92d54159f" basePath="/tasks" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<flow name="GETflow" doc:id="63f7cd52-f925-4afe-aa68-3bde42464feb" >
+		<http:listener doc:name="GET Listener" doc:id="2c621b1a-a851-4b97-8711-1aa81e4ccb41" config-ref="HTTP_Listener_config" path="/tasks" allowedMethods="GET"/>
+		<ee:transform doc:name="Transform Message" doc:id="8c788ebe-2288-4adf-9690-3b8fffa49ffd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    message: attributes.queryParams.message default "Called GET /tasks",
+    user: attributes.queryParams.user default "Anonymous"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write Request To Txt File" doc:id="38a425e1-e260-4538-9b3e-360ab1d68075" config-ref="File_Config" path="requestsLog.txt" mode="APPEND" />
+		<http:request method="GET" doc:name="Get Tasks" doc:id="57ee11e2-8a6a-4252-8c25-dfc454aeb004" config-ref="HTTP_Request_configuration" path="/tasks"/>
+		<logger level="INFO" doc:name="Log Response" doc:id="a5502a1d-1aa6-4b59-a070-7ff56526d241" message="#[message.payload]"/>
+		<file:write doc:name="Write Response to Txt File" doc:id="1b583a34-5d35-45bf-9010-2709d243b9aa" path="responsesLog.txt" config-ref="File_Config" mode="APPEND">
+			<file:content ><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+	</flow>
+	<flow name="POSTflow" doc:id="68a82077-888a-421d-ab24-16b92e75037a" >
+		<http:listener doc:name="POST Listener" doc:id="86dea4a0-d0ca-4a61-a34d-5a34b2a1327a" config-ref="HTTP_Listener_config" path="/tasks" allowedMethods="POST" />
+		<set-payload value="#[message.payload]" doc:name="Set Requst Body" doc:id="f80109e1-d90f-4819-98d1-cf10835f8637" />
+		<file:write doc:name="Write Request To Txt File" doc:id="532d3a04-e49d-422c-a5e8-b06330972156" config-ref="File_Config" path="requestsLog.txt" mode="APPEND" >
+			<file:content ><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+		<logger level="INFO" doc:name="Log Request" doc:id="287ed9ea-30b9-49c2-929b-29dc843017ac" message="#[message.payload]"/>
+		<http:request method="POST" doc:name="Create Task" doc:id="9fb919de-261e-4dff-93d1-684101f89367" config-ref="HTTP_Request_configuration1" path="/tasks" sendBodyMode="AUTO">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="3979911b-5a52-4d91-a5d7-8779a50328b7" message="#[message.payload]" />
+		<file:write doc:name="Write Response to Txt File" doc:id="79f0d0e4-4793-40ef-b926-9a5be4d1a6d1" path="responsesLog.txt" mode="APPEND" config-ref="File_Config">
+			<file:content><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+	</flow>
+	<flow name="DELETEflow" doc:id="13e807f8-3482-45d4-8988-28d1a7dc50e4">
+		<http:listener doc:name="DELETE listener" doc:id="92689a04-7a28-4567-9552-fc83f0208402" config-ref="HTTP_Listener_config" path="/tasks/{id}" allowedMethods="DELETE" />
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Path Parameter" doc:id="4d957530-439d-43e7-9976-27d52dd5efea" variableName="id" />
+		<file:write doc:name="Write Request To Txt File" doc:id="59b52de8-90c6-47b7-888a-c8c3e6db4c55" config-ref="File_Config" path="requestsLog.txt" mode="APPEND" >
+			<file:content ><![CDATA[#[attributes.uriParams.id]]]></file:content>
+		</file:write>
+		<http:request method="DELETE" doc:name="Delete Task" doc:id="b33a4c1b-43ef-4613-a764-d9b7d677851c" config-ref="HTTP_Request_configuration2" path="#[vars.id]" sendBodyMode="AUTO">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="81ed9856-5fef-4998-825a-c4783428debe" message="#[message.payload]" />
+		<file:write doc:name="Write Response to Txt File" doc:id="0e7a7784-33a0-4b35-bafc-215b3a21deb1" config-ref="File_Config" path="responsesLog.txt" mode="APPEND">
+			<file:content ><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+	</flow>
+	<flow name="PUTflow" doc:id="054a1c69-6410-4a48-9de8-a1285099957b" >
+		<http:listener doc:name="PUT listener" doc:id="068352f8-d8b5-4922-98df-730d0c75d3dd" config-ref="HTTP_Listener_config" path="/tasks/{id}"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Path Parameter" doc:id="a8d67dcb-121a-4be4-9fbf-771c17754e6b" variableName="id"/>
+		<set-payload value="#[message.payload]" doc:name="Set Request Body" doc:id="0b285be4-3f7b-419e-beef-a7d31055f56f" />
+		<file:write doc:name="Write Request To Txt File" doc:id="39ef003c-e6b4-4b8b-9405-e69d516c2c67" config-ref="File_Config" path="requestsLog.txt" mode="APPEND" >
+			<file:content ><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+		<http:request method="PUT" doc:name="Update Task" doc:id="2c687c21-cc8e-4af9-b128-2bd9150dfafb" config-ref="HTTP_Request_configuration2" path="#[vars.id]" sendBodyMode="AUTO" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="dd2bd0c8-17ab-4850-8741-68804e29349d" message="#[message.payload]" />
+		<file:write doc:name="Write Response to Txt File" doc:id="9fa2023f-aa76-4e95-9d10-855bd2762ab4" config-ref="File_Config" path="responsesLog.txt" mode="APPEND">
+			<file:content ><![CDATA[#[message.payload]]]></file:content>
+		</file:write>
+	</flow>
+</mule>
