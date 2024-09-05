@@ -8,21 +8,21 @@ import TaskService from '../services/taskService';
 const taskService = new TaskService();
 
 class TaskController {
-  // Fetch all tasks for a specific user
+
   getAllUserTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const tasks = await TaskService.getAllUserTasks(req.user.id);
     logger.info(`Successfully fetched all tasks for user with ID: ${req.user.id}`);
     res.json(tasks.map((task: any) => JSON.parse(serialize(task))));
   });
 
-  // Fetch all tasks (Admin)
+
   getAllTasks = asyncHandler(async (req: Request, res: Response) => {
     const tasks = await TaskService.getAllTasks();
     logger.info('Successfully fetched all tasks');
     res.json(tasks.map((task: any) => JSON.parse(serialize(task))));
   });
 
-  // Add a new task
+
   addTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     logger.info(`Request Body: ${JSON.stringify(req.body)}`);
     try {
@@ -36,7 +36,7 @@ class TaskController {
     }
   });
 
-  // Update an existing task
+
   updateTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     logger.info(`Request Body: ${JSON.stringify(req.body)}`);
@@ -51,14 +51,14 @@ class TaskController {
     }
   });
 
-  // Delete a task
+
   deleteTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     await TaskService.deleteTask(req.params.id);
     logger.info(`Successfully deleted task with ID: ${req.params.id}`);
     res.status(200).json({ message: `Successfully deleted task with ID: ${req.params.id}` });
   });
 
-  // Reorder tasks
+
   reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { taskIdsInOrder } = req.body;
     await TaskService.reorderTasks(req.user.id, taskIdsInOrder);

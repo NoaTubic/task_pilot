@@ -16,7 +16,7 @@ dotenv.config();
 const app = express();
 app.disable('x-powered-by');
 
-// Enable CORS
+
 app.use(corsMiddleware);
 
 app.use(setHeaders);

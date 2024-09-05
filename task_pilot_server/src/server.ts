@@ -23,10 +23,8 @@ const certificate = fs.readFileSync(certificatePath, 'utf8');
 
 const credentials = { key: privateKey, cert: certificate };
 
-// Create HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
-// Create HTTP server that redirects to HTTPS
 const httpApp = express();
 httpApp.use((req, res, next) => {
   if (req.secure) {

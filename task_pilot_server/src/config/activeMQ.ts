@@ -10,4 +10,3 @@ export const activemqConfig = {
 };
 
 
-//http://localhost:8161/admin

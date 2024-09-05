@@ -1,5 +1,3 @@
-// taskRepository.ts
-
 import sequelize from '../config/database';
 import Task from '../models/task';
 
@@ -8,7 +6,7 @@ type TaskCreationAttributes = {
   description?: string;
   order: number;
   isCompleted?: boolean;
-  userId: string; // Add the 'userId' property
+  userId: string;
 };
 
 export class TaskRepository {
